@@ -83,7 +83,7 @@ selected_month = st.sidebar.slider("Travel Month", 1, 12, 6)
 selected_dur = st.sidebar.selectbox("Duration", ["Weekend", "Short trip", "One week", "Long trip"])
 
 # --- MAIN DASHBOARD ---
-st.title("🌍 GlobeQuest: Travel City Recommender")
+st.title("Travel City Recommender")
 st.markdown("Predicting your ideal destination using **Gradient Boosting** and **K-Nearest Neighbors**.")
 
 if st.sidebar.button("Generate Recommendations") and selected_types:
