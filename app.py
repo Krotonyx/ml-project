@@ -7,7 +7,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import OrdinalEncoder
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="GlobeQuest AI", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="Travel City Recommender", page_icon="🌍", layout="wide")
 
 
 # --- CORE LOGIC (CACHED) ---
