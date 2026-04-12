@@ -5,18 +5,16 @@ import json
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neighbors import NearestNeighbors
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Global Wanderer | AI Travel Recommender", layout="centered")
+st.set_page_config(page_title="ML Travel Recommender", layout="centered")
 
-# --- CUSTOM CSS (Cinematic Slideshow & Glassmorphism) ---
+# --- CUSTOM CSS (Cinematic Background & Glassmorphism) ---
 st.markdown("""
     <style>
-    /* Background Cinematic Slideshow */
+    /* Background Cinematic Image */
     .stApp {
         background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.65)), 
                     url('https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=2000');
@@ -25,7 +23,7 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* Glassmorphism Card */
+    /* Main Glass Card */
     .main-card {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(15px);
@@ -45,7 +43,7 @@ st.markdown("""
         padding-bottom: 15px;
     }
     
-    /* Force white text for labels */
+    /* Global Text Colors */
     label, p, h1, h2, h3 { color: white !important; }
 
     /* Button Styling */
@@ -95,36 +93,43 @@ def train_models(df):
     y = df['budget_level_idx']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Logic: Train GBC (Our best model) with pre-optimized params (removed Grid Search)
     model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
     model.fit(X_train, y_train)
-    
-    acc = accuracy_score(y_test, model.predict(X_test))
-    return model, features, acc
+    return model, features
 
-# Load Data and Model
+# Initialize
 df = load_and_clean_data()
-model_gbc, FEATURE_COLS_FULL, accuracy = train_models(df)
+model_gbc, FEATURE_COLS_FULL = train_models(df)
 
 # --- UI LAYOUT ---
-st.markdown('<div class="header-text"><h1>Global Wanderer</h1><p>AI Travel Recommendations using Gradient Boosting (Accuracy: 75%)</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="header-text"><h1>Global Wanderer</h1><p>Discover your perfect destination using Machine Learning.</p></div>', unsafe_allow_html=True)
+
+# Month Mapping for the Dropdown
+month_map = {
+    "January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,
+    "July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12
+}
 
 with st.container():
+    # Removed the redundant "glass-bar" and combined everything into the main card
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     with col1:
-        region_input = st.selectbox("Where do you want to go?", 
+        region_input = st.selectbox("Preferred Region", 
                                     ['europe', 'asia', 'africa', 'oceania', 'middle_east', 'north_america', 'south_america'])
-        month_input = st.slider("When are you traveling? (Month)", 1, 12, 6)
+        
+        # FIX: Month Slider converted to Dropdown
+        selected_month_name = st.selectbox("Travel Month", list(month_map.keys()), index=5)
+        month_input = month_map[selected_month_name]
     
     with col2:
-        duration_input = st.selectbox("How long is the trip?", 
+        duration_input = st.selectbox("Trip Duration", 
                                       ["Weekend", "Short trip", "One week", "Long trip"])
-        trip_types = st.multiselect("What do you enjoy?", 
+        trip_types = st.multiselect("Travel Interests", 
                                     ['beach', 'adventure', 'culture', 'food', 'nightlife', 'wellness', 'nature', 'urban'])
 
-    # ML LOGIC FOR RECOMMENDATION
+    # ML LOGIC
     TRIP_TYPE_VECTORS = {
         'beach':     {'culture':2, 'adventure':2, 'nature':3, 'beaches':5, 'nightlife':2, 'cuisine':2, 'wellness':3, 'urban':1, 'seclusion':3},
         'adventure': {'culture':2, 'adventure':5, 'nature':4, 'beaches':2, 'nightlife':1, 'cuisine':2, 'wellness':2, 'urban':1, 'seclusion':3},
@@ -138,9 +143,9 @@ with st.container():
 
     if st.button("Generate Recommendations"):
         if not trip_types:
-            st.warning("Please select at least one interest.")
+            st.warning("Please select at least one travel interest.")
         else:
-            # 1. Build Preference Vector
+            # Prediction Logic
             base_features = ['culture', 'adventure', 'nature', 'beaches', 'nightlife', 'cuisine', 'wellness', 'urban', 'seclusion']
             prefs = {col: 0 for col in base_features}
             for t in trip_types:
@@ -148,7 +153,6 @@ with st.container():
                     prefs[col] += TRIP_TYPE_VECTORS[t][col]
             avg_prefs = [round(prefs[col] / len(trip_types)) for col in base_features]
             
-            # 2. Predict Budget
             region_cols = ['europe', 'asia', 'africa', 'oceania', 'middle_east', 'north_america', 'south_america']
             region_values = [1 if col == region_input else 0 for col in region_cols]
             full_input = avg_prefs + region_values
@@ -156,16 +160,16 @@ with st.container():
             pred_budget_idx = model_gbc.predict([full_input])[0]
             budget_labels = {0: 'Budget', 1: 'Mid-range', 2: 'Luxury'}
             
-            st.success(f"Our AI suggests a **{budget_labels[pred_budget_idx]}** budget for this trip.")
+            st.success(f"Our AI predicts a **{budget_labels[pred_budget_idx]}** budget level for this journey.")
             
-            # 3. Filter and KNN Match
+            # Filtering and KNN
             filtered = df[(df['region'] == region_input) & 
                           (df['budget_level_idx'] == pred_budget_idx) &
                           (df['ideal_durations'].apply(lambda x: duration_input in x)) &
                           (df['avg_temp_monthly'].apply(lambda x: x[str(month_input)]['avg'] >= 15))]
             
             if filtered.empty:
-                st.info("No exact matches found for those specific climate/duration filters. Try a different month or duration!")
+                st.info("No exact matches found. Try changing the travel month or trip duration!")
             else:
                 knn = NearestNeighbors(n_neighbors=min(5, len(filtered)), metric='cosine')
                 knn.fit(filtered[base_features])
@@ -174,7 +178,6 @@ with st.container():
                 results = filtered.iloc[indices[0]].copy()
                 results['Match Score'] = (1 - dist[0]).round(3)
                 
-                # Display Results
                 st.markdown("### Top Destination Matches")
                 final_display = results[['city', 'country', 'budget_level', 'Match Score']].rename(columns=str.title)
                 st.dataframe(final_display, use_container_width=True, hide_index=True)
