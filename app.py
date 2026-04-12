@@ -21,16 +21,6 @@ st.markdown("""
         background-position: center;
         background-attachment: fixed;
     }
-    .main-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-        padding: 30px;
-        color: white;
-        margin-bottom: 20px;
-    }
     .header-text {
         text-align: center;
         margin-bottom: 25px;
