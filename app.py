@@ -10,9 +10,10 @@ from sklearn.neighbors import NearestNeighbors
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="ML Travel Recommender", layout="centered")
 
-# --- CUSTOM CSS (Matching your reference image) ---
+# --- CUSTOM CSS (Full Page Glass Coverage) ---
 st.markdown("""
     <style>
+    /* background setup */
     .stApp {
         background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
                     url('https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=2000');
@@ -21,30 +22,31 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* Centered Glass Card Styling */
+    /* Full height glass card */
     .main-card {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.12);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 24px;
-        padding: 40px;
+        padding: 50px 40px;
         color: white;
         box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-        max-width: 600px;
-        margin: auto;
+        width: 100%;
+        min-height: 90vh; /* Covers most of the viewport height */
+        margin: 20px 0;
     }
 
     .header-text {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        padding-bottom: 20px;
+        padding-bottom: 25px;
     }
 
-    h1 { font-size: 2.2rem !important; font-weight: 600 !important; margin-bottom: 8px !important; }
-    p { color: #e2e8f0 !important; font-size: 0.95rem !important; }
-    label { color: #e2e8f0 !important; font-size: 0.85rem !important; font-weight: 500 !important; margin-bottom: 8px !important; }
+    h1 { font-size: 2.5rem !important; font-weight: 700 !important; }
+    p { color: #cbd5e1 !important; font-size: 1rem !important; }
+    label { color: #f1f5f9 !important; font-size: 0.9rem !important; font-weight: 600 !important; }
 
     /* Button Styling */
     .stButton>button {
@@ -52,31 +54,25 @@ st.markdown("""
         color: white;
         border-radius: 14px;
         width: 100%;
-        padding: 16px;
-        font-size: 1.05rem;
+        padding: 18px;
+        font-size: 1.1rem;
         font-weight: 600;
         border: none;
         transition: 0.3s;
-        margin-top: 20px;
+        margin-top: 30px;
     }
     .stButton>button:hover {
         background: #0284c7;
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
 
-    /* Style checkboxes to look like clean selectable options */
+    /* Checkbox Styling */
     .stCheckbox {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 8px 15px;
-        border-radius: 10px;
-        margin-bottom: 5px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 10px 15px;
+        border-radius: 12px;
+        margin-bottom: 8px;
         border: 1px solid transparent;
-        transition: 0.2s;
-    }
-    .stCheckbox:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -129,8 +125,8 @@ TRIP_TYPE_VECTORS = {
 st.markdown('<div class="main-card">', unsafe_allow_html=True)
 st.markdown('<div class="header-text"><h1>Global Wanderer</h1><p>Discover your perfect destination using Machine Learning.</p></div>', unsafe_allow_html=True)
 
-# Travel Interests (Checkboxes in grid)
-st.markdown("<label>Travel Interests (Select all that apply)</label>", unsafe_allow_html=True)
+# Travel Interests
+st.markdown("<label>Travel Interests <span style='font-weight:300'>(Select all that apply)</span></label>", unsafe_allow_html=True)
 interest_options = ['beach', 'adventure', 'culture', 'food', 'nightlife', 'nature']
 icons = ["🏖️ Beach", "🏔️ Adventure", "🏛️ Culture", "🍕 Food", "🍸 Nightlife", "🌿 Nature"]
 
@@ -143,7 +139,7 @@ for i, option in enumerate(interest_options):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Other Fields
+# Input Fields
 col_left, col_right = st.columns(2)
 with col_left:
     selected_region_display = st.selectbox("Preferred Region", list(region_map.keys()))
