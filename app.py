@@ -148,7 +148,7 @@ with st.container():
             pred_budget_idx = model_gbc.predict([full_input])[0]
             budget_labels = {0: 'Budget', 1: 'Mid-range', 2: 'Luxury'}
             
-            st.success(f"Our AI predicts a **{budget_labels[pred_budget_idx]}** budget level for this journey.")
+            st.success(f"Our Model predicts a **{budget_labels[pred_budget_idx]}** budget level for this journey.")
             
             # Filtering and KNN
             filtered = df[(df['region'] == region_input) & 
